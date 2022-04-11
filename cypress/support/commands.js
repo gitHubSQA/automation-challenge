@@ -23,3 +23,25 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+require('cy-verify-downloads').addCustomCommand()
+
+Cypress.Commands.add('sessionCleanUp', () => {
+    cy.clearCookies()
+    cy.clearLocalStorage()
+})
+
+Cypress.Commands.add('clickNavigationBar', (navBarBrand) => {
+    cy.get('a').contains(navBarBrand).click()
+})
+
+Cypress.Commands.add('alertMessageIntercept', (element, alertMessage, implicitWait) => {
+    const stub = cy.stub()
+    cy.on('window:alert', stub)
+    cy.get(element).should('be.visible').click().then(() => {
+        cy.wait(implicitWait)
+            .then(() => {
+                expect(stub.getCall(0)).to.be.calledWith(alertMessage)
+            })
+    })
+})
